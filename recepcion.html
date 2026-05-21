@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hoyo 19 — Recepción</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Cinzel:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --verde:  #1A3A1A;
+    --verde2: #2D5A2D;
+    --gold:   #C9A84C;
+    --bg:     #F8F5EF;
+    --card:   #FFFFFF;
+    --txt:    #1A1A1A;
+    --txt2:   #666;
+    --border: #E0D8C8;
+    --ok:     #1B5E20;
+    --ok-bg:  #E8F5E9;
+    --warn:   #8A6A1A;
+    --warn-bg:#FFF9E6;
+    --err:    #B71C1C;
+    --err-bg: #FFEBEE;
+    --radius: 14px;
+  }
+
+  body { font-family: "DM Sans", sans-serif; background: var(--bg); min-height: 100vh; color: var(--txt); }
+
+  .header {
+    background: var(--verde);
+    border-bottom: 2px solid var(--gold);
+    padding: 16px 24px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .header svg { flex-shrink: 0; }
+  .header h1 { font-family: "Cormorant Garamond", serif; color: var(--gold); font-size: 26px; font-weight: 600; line-height: 1; }
+  .header p  { font-family: "Cinzel", serif; color: #9FBE9F; font-size: 8px; margin-top: 5px; letter-spacing: 3px; text-transform: uppercase; }
+  .header-badge { margin-left: auto; background: #C9A84C22; border: 1px solid #C9A84C55; color: var(--gold); font-size: 12px; padding: 4px 14px; border-radius: 20px; }
+
+  .container { max-width: 520px; margin: 0 auto; padding: 24px 16px 48px; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 16px; }
+  .card-title { font-family: "Cormorant Garamond", serif; font-size: 18px; color: var(--verde); margin-bottom: 16px; }
+
+  .search-row { display: flex; gap: 10px; }
+  .search-row input {
+    flex: 1; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px;
+    font-family: "DM Sans", sans-serif; font-size: 16px; color: var(--txt);
+    background: var(--bg); -webkit-appearance: none;
+  }
+  .search-row input:focus { outline: none; border-color: var(--verde); background: #fff; }
+  .btn-buscar {
+    padding: 12px 20px; background: var(--verde); color: var(--gold);
+    border: none; border-radius: 10px; font-size: 15px; font-weight: 500;
+    cursor: pointer; transition: background .15s; white-space: nowrap;
+  }
+  .btn-buscar:hover { background: var(--verde2); }
+  .btn-buscar:disabled { background: #ccc; color: #888; cursor: not-allowed; }
+
+  .alert { border-radius: 10px; padding: 12px 16px; font-size: 14px; margin-top: 14px; display: none; }
+  .alert.ok   { background: var(--ok-bg);   color: var(--ok);   display: block; }
+  .alert.warn { background: var(--warn-bg); color: var(--warn); display: block; }
+  .alert.err  { background: var(--err-bg);  color: var(--err);  display: block; }
+
+  /* SOCIO CARD */
+  .socio-card { display: none; }
+  .socio-card.visible { display: block; }
+
+  .socio-header {
+    background: linear-gradient(135deg, #1a3a1a, #2d5a2d);
+    border-radius: 12px 12px 0 0;
+    padding: 18px 20px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .avatar {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: #C9A84C22; border: 2px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Cormorant Garamond", serif;
+    font-size: 20px; font-weight: 600; color: var(--gold);
+    flex-shrink: 0;
+  }
+  .socio-nombre { font-size: 18px; font-weight: 500; color: #F0E8D0; }
+  .socio-dni    { font-size: 13px; color: #9FBE9F; margin-top: 2px; }
+
+  .socio-body { border: 1px solid var(--border); border-top: none; border-radius: 0 0 12px 12px; padding: 20px; }
+
+  /* CONTADOR GRANDE */
+  .counter { text-align: center; padding: 16px 0 20px; }
+  .counter-num { font-size: 88px; font-weight: 300; color: var(--verde); line-height: 1; transition: all .3s; }
+  .counter-num.restando { transform: scale(1.15); color: var(--gold); }
+  .counter-label { font-size: 13px; color: var(--txt2); margin-top: 4px; }
+
+  /* TACITAS */
+  .cups { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-bottom: 20px; }
+  .cup { font-size: 20px; transition: all .2s; }
+  .cup.empty { opacity: .15; }
+  .cup.consumido { transform: scale(0); }
+
+  /* BOTÓN DISPENSAR */
+  .btn-dispensar {
+    width: 100%; padding: 18px; border: none; border-radius: 12px;
+    background: var(--verde); color: var(--gold);
+    font-family: "DM Sans", sans-serif; font-size: 17px; font-weight: 500;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: all .15s;
+  }
+  .btn-dispensar:hover:not(:disabled) { background: var(--verde2); }
+  .btn-dispensar:active:not(:disabled) { transform: scale(0.98); }
+  .btn-dispensar:disabled { background: #ccc; color: #888; cursor: not-allowed; }
+  .btn-dispensar .cup-big { font-size: 24px; }
+
+  .vence-info { text-align: center; font-size: 12px; color: var(--txt2); margin-top: 10px; }
+
+  /* CANTIDAD */
+  .cantidad-row { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 16px; }
+  .btn-qty {
+    width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border);
+    background: var(--card); font-size: 20px; cursor: pointer; display: flex;
+    align-items: center; justify-content: center; color: var(--txt2);
+    transition: all .15s;
+  }
+  .btn-qty:hover { border-color: var(--verde); color: var(--verde); }
+  .qty-num { font-size: 22px; font-weight: 500; color: var(--txt); min-width: 32px; text-align: center; }
+  .qty-label { font-size: 13px; color: var(--txt2); }
+
+  /* HISTORIAL */
+  .hist-title { font-size: 13px; font-weight: 500; color: var(--txt2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  .hist-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .hist-item:last-child { border-bottom: none; }
+  .hist-nombre { flex: 1; font-size: 13px; font-weight: 500; }
+  .hist-hora   { font-size: 12px; color: var(--txt2); }
+  .hist-qty    { font-size: 12px; color: var(--txt2); }
+
+  .empty-hist { font-size: 13px; color: var(--txt2); text-align: center; padding: 12px 0; }
+
+  /* SPINNER */
+  .spinner { width: 18px; height: 18px; border: 2px solid rgba(201,168,76,0.3); border-top-color: var(--gold); border-radius: 50%; animation: spin .7s linear infinite; display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--verde); color: var(--gold); padding: 12px 24px;
+    border-radius: 12px; border: 1px solid #C9A84C44;
+    font-size: 14px; font-weight: 500; transition: transform .3s; z-index: 100; white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  @media (min-width: 768px) {
+    .container { max-width: 680px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <svg width="48" height="48" viewBox="0 0 52 52" fill="none">
+    <line x1="22" y1="8" x2="22" y2="40" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/>
+    <polygon points="22,8 36,14 22,20" fill="#C9A84C"/>
+    <ellipse cx="22" cy="42" rx="14" ry="5" fill="#2D5A2D"/>
+    <ellipse cx="22" cy="43" rx="4" ry="1.5" fill="#1A1A1A"/>
+  </svg>
+  <div>
+    <h1>Hoyo 19</h1>
+    <p>Café &amp; Terrazas del Golf</p>
+  </div>
+  <div class="header-badge">Recepción</div>
+</div>
+
+<div class="container">
+
+  <!-- BUSCAR -->
+  <div class="card">
+    <div class="card-title">Verificar socio por DNI</div>
+    <div class="search-row">
+      <input type="text" id="dniInput" placeholder="Ingresá el DNI" inputmode="numeric" maxlength="8"
+        onkeydown="if(event.key==='Enter') buscar()">
+      <button class="btn-buscar" id="btnBuscar" onclick="buscar()">
+        <span id="btnTxt">Buscar</span>
+        <div class="spinner" id="spinner"></div>
+      </button>
+    </div>
+    <div class="alert" id="alertBuscar"></div>
+  </div>
+
+  <!-- SOCIO -->
+  <div class="socio-card" id="socioCard">
+    <div class="socio-header">
+      <div class="avatar" id="avatar">--</div>
+      <div>
+        <div class="socio-nombre" id="socioNombre">—</div>
+        <div class="socio-dni" id="socioDni">—</div>
+      </div>
+    </div>
+    <div class="socio-body">
+
+      <div class="counter">
+        <div class="counter-num" id="counterNum">0</div>
+        <div class="counter-label">cafés disponibles</div>
+      </div>
+
+      <div class="cups" id="cupsRow"></div>
+
+      <!-- CANTIDAD A DISPENSAR -->
+      <div class="cantidad-row">
+        <button class="btn-qty" onclick="cambiarQty(-1)">−</button>
+        <div>
+          <div class="qty-num" id="qtyNum">1</div>
+          <div class="qty-label" style="text-align:center">a dispensar</div>
+        </div>
+        <button class="btn-qty" onclick="cambiarQty(1)">+</button>
+      </div>
+
+      <button class="btn-dispensar" id="btnDispensar" onclick="dispensar()">
+        <span class="cup-big">☕</span>
+        <span id="btnDispensarTxt">Dar café — descontar 1</span>
+      </button>
+      <div class="vence-info" id="venceInfo"></div>
+      <div class="alert" id="alertDispensar" style="margin-top:12px"></div>
+    </div>
+  </div>
+
+  <!-- HISTORIAL -->
+  <div class="card">
+    <div class="hist-title">Historial del turno</div>
+    <div id="historial">
+      <div class="empty-hist">Sin movimientos aún.</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbw0BTkay6iDl9Lm5tZXHocwNaHda-tK8qoGCAI9Q4ljiWT5OnQt5o4vvUjQhO5YmiFL/exec';
+
+let socioActual = null;
+let qty = 1;
+let historial = [];
+
+function buscar() {
+  const dni = document.getElementById('dniInput').value.trim();
+  const alert = document.getElementById('alertBuscar');
+
+  if (!/^\d{7,8}$/.test(dni)) {
+    showAlert(alert, 'err', 'Ingresá un DNI válido (7 u 8 números).');
+    return;
+  }
+
+  setLoading(true);
+  document.getElementById('socioCard').classList.remove('visible');
+  alert.style.display = 'none';
+
+  fetch(`${API_URL}?action=verificar&dni=${dni}`)
+    .then(r => r.json())
+    .then(data => {
+      setLoading(false);
+      if (!data.ok) {
+        showAlert(alert, 'err', data.msg || 'DNI no encontrado.');
+        return;
+      }
+      if (data.estado !== 'ACTIVO') {
+        showAlert(alert, 'warn', `${data.nombre} — membresía ${data.estado}. No puede consumir cafés.`);
+        return;
+      }
+      socioActual = data;
+      qty = 1;
+      mostrarSocio(data);
+    })
+    .catch(() => {
+      setLoading(false);
+      showAlert(alert, 'err', 'Error de conexión. Intentá nuevamente.');
+    });
+}
+
+function mostrarSocio(data) {
+  const iniciales = data.nombre.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+  document.getElementById('avatar').textContent = iniciales;
+  document.getElementById('socioNombre').textContent = data.nombre;
+  document.getElementById('socioDni').textContent = 'DNI ' + data.dni;
+  document.getElementById('alertDispensar').style.display = 'none';
+
+  actualizarContador(data.cafes);
+
+  if (data.vence) {
+    document.getElementById('venceInfo').textContent = `Membresía vence: ${data.vence}`;
+  }
+
+  document.getElementById('socioCard').classList.add('visible');
+  actualizarBoton();
+}
+
+function actualizarContador(cafes) {
+  document.getElementById('counterNum').textContent = cafes;
+  document.getElementById('counterNum').style.color = cafes === 0 ? 'var(--err)' : cafes <= 3 ? '#8A6A1A' : 'var(--verde)';
+
+  const cups = document.getElementById('cupsRow');
+  cups.innerHTML = '';
+  const max = Math.min(Math.max(cafes, 0), 20);
+  for (let i = 0; i < 20; i++) {
+    const c = document.createElement('span');
+    c.className = 'cup' + (i >= cafes ? ' empty' : '');
+    c.textContent = '☕';
+    cups.appendChild(c);
+  }
+}
+
+function cambiarQty(delta) {
+  if (!socioActual) return;
+  const max = socioActual.cafes;
+  qty = Math.max(1, Math.min(qty + delta, max));
+  document.getElementById('qtyNum').textContent = qty;
+  actualizarBoton();
+}
+
+function actualizarBoton() {
+  const btn = document.getElementById('btnDispensar');
+  const txt = document.getElementById('btnDispensarTxt');
+  if (!socioActual || socioActual.cafes <= 0) {
+    btn.disabled = true;
+    txt.textContent = 'Sin cafés disponibles';
+  } else {
+    btn.disabled = false;
+    txt.textContent = qty === 1 ? 'Dar café — descontar 1' : `Dar ${qty} cafés — descontar ${qty}`;
+  }
+}
+
+function dispensar() {
+  if (!socioActual || socioActual.cafes <= 0) return;
+
+  const btn = document.getElementById('btnDispensar');
+  btn.disabled = true;
+
+  // Dispensar qty veces en secuencia
+  dispensarUno(qty, () => {
+    actualizarBoton();
+  });
+}
+
+function dispensarUno(restantes, callback) {
+  if (restantes <= 0) { callback(); return; }
+
+  fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'dispensar', dni: socioActual.dni, turno: 'recepcion' })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) {
+      socioActual.cafes = data.cafesRestantes;
+      actualizarContador(data.cafesRestantes);
+
+      const num = document.getElementById('counterNum');
+      num.classList.add('restando');
+      setTimeout(() => num.classList.remove('restando'), 300);
+
+      dispensarUno(restantes - 1, callback);
+    } else {
+      showAlert(document.getElementById('alertDispensar'), 'err', data.msg);
+      callback();
+    }
+  })
+  .catch(() => {
+    showAlert(document.getElementById('alertDispensar'), 'err', 'Error de conexión.');
+    callback();
+  });
+}
+
+function dispensarUno(restantes, callback) {
+  if (restantes <= 0) {
+    // Agregar al historial al final
+    const ahora = new Date();
+    const hora = ahora.getHours().toString().padStart(2,'0') + ':' + ahora.getMinutes().toString().padStart(2,'0');
+    historial.unshift({ nombre: socioActual.nombre, hora, qty: qty - restantes, restantes: socioActual.cafes });
+    renderHistorial();
+    showToast(`☕ ${qty} café${qty>1?'s':''} servido${qty>1?'s':''} a ${socioActual.nombre}`);
+    qty = 1;
+    document.getElementById('qtyNum').textContent = 1;
+    callback();
+    return;
+  }
+
+  fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'dispensar', dni: socioActual.dni, turno: 'recepcion' })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) {
+      socioActual.cafes = data.cafesRestantes;
+      actualizarContador(data.cafesRestantes);
+      const num = document.getElementById('counterNum');
+      num.classList.add('restando');
+      setTimeout(() => num.classList.remove('restando'), 300);
+      dispensarUno(restantes - 1, callback);
+    } else {
+      showAlert(document.getElementById('alertDispensar'), 'err', data.msg);
+      callback();
+    }
+  })
+  .catch(() => {
+    showAlert(document.getElementById('alertDispensar'), 'err', 'Error de conexión.');
+    callback();
+  });
+}
+
+function renderHistorial() {
+  const el = document.getElementById('historial');
+  if (historial.length === 0) {
+    el.innerHTML = '<div class="empty-hist">Sin movimientos aún.</div>';
+    return;
+  }
+  el.innerHTML = historial.slice(0,8).map(h => `
+    <div class="hist-item">
+      <span>☕</span>
+      <span class="hist-nombre">${h.nombre}</span>
+      <span class="hist-hora">${h.hora}</span>
+      <span class="hist-qty">${h.restantes} restantes</span>
+    </div>
+  `).join('');
+}
+
+function setLoading(on) {
+  document.getElementById('btnBuscar').disabled = on;
+  document.getElementById('spinner').style.display = on ? 'block' : 'none';
+  document.getElementById('btnTxt').style.opacity = on ? '0.4' : '1';
+}
+
+function showAlert(el, tipo, msg) {
+  el.className = 'alert ' + tipo;
+  el.textContent = msg;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+document.getElementById('dniInput').addEventListener('input', e => {
+  e.target.value = e.target.value.replace(/\D/g, '');
+});
+</script>
+</body>
+</html>
