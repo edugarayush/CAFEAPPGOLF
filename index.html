@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hoyo 19 — Club de Café</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Cinzel:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --verde:   #1A3A1A;
+    --verde2:  #2D5A2D;
+    --gold:    #C9A84C;
+    --gold-lt: #F5EDD4;
+    --bg:      #F8F5EF;
+    --card:    #FFFFFF;
+    --txt:     #1A1A1A;
+    --txt2:    #666;
+    --border:  #E0D8C8;
+    --ok:      #1B5E20;
+    --ok-bg:   #E8F5E9;
+    --warn:    #8A6A1A;
+    --warn-bg: #FFF9E6;
+    --err:     #B71C1C;
+    --err-bg:  #FFEBEE;
+    --radius:  14px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    color: var(--txt);
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--verde);
+    border-bottom: 2px solid var(--gold);
+    padding: 20px 24px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .header-logo { height: 52px; width: auto; }
+  .header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    color: var(--gold);
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 1px;
+  }
+  .header p {
+    font-family: 'Cinzel', serif;
+    color: #9FBE9F;
+    font-size: 8.5px;
+    margin-top: 6px;
+    letter-spacing: 3.5px;
+    font-weight: 400;
+    text-transform: uppercase;
+  }
+
+  /* ── CONTENEDOR ── */
+  .container { max-width: 480px; margin: 0 auto; padding: 24px 16px 48px; }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    color: var(--verde);
+    margin-bottom: 6px;
+  }
+  .card-sub {
+    font-size: 13px;
+    color: var(--txt2);
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  /* ── FORM ── */
+  .field { margin-bottom: 18px; }
+  label { display: block; font-size: 13px; font-weight: 500; color: var(--txt2); margin-bottom: 6px; }
+  input[type="text"], input[type="email"], input[type="tel"] {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--txt);
+    background: var(--bg);
+    transition: border-color .2s;
+    -webkit-appearance: none;
+  }
+  input:focus { outline: none; border-color: var(--verde); background: #fff; }
+
+  /* ── BOTONES ── */
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .15s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-primary { background: var(--verde); color: var(--gold); }
+  .btn-primary:hover { background: var(--verde2); }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-primary:disabled { background: #ccc; color: #888; cursor: not-allowed; }
+
+  .btn-wp {
+    background: #25D366;
+    color: #fff;
+    margin-top: 12px;
+    text-decoration: none;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 15px; font-weight: 500;
+    transition: all .15s;
+  }
+  .btn-wp:hover { background: #1ebe5d; }
+  .btn-wp:active { transform: scale(0.98); }
+
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--txt2);
+    margin-top: 8px;
+  }
+  .btn-outline:hover { border-color: var(--verde); color: var(--verde); }
+
+  /* ── ESTADOS / ALERTS ── */
+  .alert {
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 16px;
+    display: none;
+  }
+  .alert.ok   { background: var(--ok-bg);   color: var(--ok);   display: block; }
+  .alert.warn { background: var(--warn-bg); color: var(--warn); display: block; }
+  .alert.err  { background: var(--err-bg);  color: var(--err);  display: block; }
+
+  /* ── COFFEE DISPLAY ── */
+  .coffee-hero {
+    text-align: center;
+    padding: 20px 0 8px;
+  }
+  .coffee-number {
+    font-size: 80px;
+    font-weight: 300;
+    color: var(--verde);
+    line-height: 1;
+  }
+  .coffee-label {
+    font-size: 14px;
+    color: var(--txt2);
+    margin-top: 6px;
+  }
+  .coffee-cups {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    justify-content: center;
+    margin: 20px 0 12px;
+  }
+  .cup { font-size: 22px; transition: transform .1s; }
+  .cup.empty { opacity: .2; }
+
+  /* ── INFO BADGES ── */
+  .info-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-row .lbl { color: var(--txt2); }
+  .info-row .val { font-weight: 500; }
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .badge-ok     { background: var(--ok-bg);   color: var(--ok);   }
+  .badge-warn   { background: var(--warn-bg); color: var(--warn); }
+  .badge-err    { background: var(--err-bg);  color: var(--err);  }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    background: var(--border);
+    border-radius: 10px;
+    padding: 3px;
+    margin-bottom: 20px;
+  }
+  .tab {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--txt2);
+    border: none;
+    background: transparent;
+    transition: all .15s;
+  }
+  .tab.active { background: var(--card); color: var(--verde); }
+
+  /* ── VIEWS ── */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ── SPINNER ── */
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid rgba(201,168,76,0.3);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    display: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading { display: flex; align-items: center; gap: 10px; color: var(--txt2); font-size: 14px; }
+
+  /* ── PASOS ── */
+  .paso-num {
+    display: inline-flex;
+    width: 24px; height: 24px;
+    background: var(--gold-lt);
+    color: var(--warn);
+    border-radius: 50%;
+    align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 500;
+    margin-right: 6px;
+    flex-shrink: 0;
+  }
+  .paso { display: flex; align-items: flex-start; gap: 0; margin-bottom: 10px; font-size: 14px; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img src="./img/logo.png" class="header-logo" alt="Hoyo 19">
+  <div>
+    <h1>Hoyo 19</h1>
+    <p>Café &amp; Terrazas del Golf</p>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('alta')">Quiero ser socio</button>
+    <button class="tab" onclick="showTab('estado')">Mis cafés</button>
+  </div>
+
+  <!-- ══ TAB ALTA ══ -->
+  <div id="view-alta" class="view active">
+
+    <div class="card">
+      <div class="card-title">Solicitar membresía</div>
+      <div class="card-sub">Completá tus datos, pagá la membresía y envianos el comprobante por WhatsApp. Te activamos en minutos.</div>
+
+      <div id="alert-alta" class="alert"></div>
+
+      <div id="form-alta">
+        <div class="field">
+          <label>Nombre completo</label>
+          <input type="text" id="nombre" placeholder="Juan Pérez" autocomplete="name">
+        </div>
+        <div class="field">
+          <label>DNI (sin puntos)</label>
+          <input type="text" id="dni" placeholder="32456789" inputmode="numeric" maxlength="8">
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="email" placeholder="juan@email.com" autocomplete="email">
+        </div>
+        <div class="field">
+          <label>Teléfono <span style="font-weight:300;color:#aaa">(opcional)</span></label>
+          <input type="tel" id="telefono" placeholder="351 111 2222">
+        </div>
+
+        <button class="btn btn-primary" onclick="enviarAlta()" id="btn-alta">
+          <span id="btn-alta-txt">Registrar solicitud</span>
+          <div class="spinner" id="spinner-alta"></div>
+        </button>
+      </div>
+
+      <!-- Estado post-registro -->
+      <div id="post-alta" style="display:none">
+        <div style="text-align:center; padding: 8px 0 20px;">
+          <div style="font-size:48px; margin-bottom:12px">✅</div>
+          <div style="font-size:17px; font-weight:500; color:var(--verde); margin-bottom:6px">¡Solicitud registrada!</div>
+          <div style="font-size:14px; color:var(--txt2); line-height:1.5; margin-bottom:20px">Ahora envianos el comprobante de pago por WhatsApp y te activamos.</div>
+        </div>
+
+        <div class="card-sub" style="margin-bottom:12px">
+          <div class="paso"><span class="paso-num">1</span> Tocá el botón verde de abajo</div>
+          <div class="paso"><span class="paso-num">2</span> Se abre WhatsApp con el mensaje listo</div>
+          <div class="paso"><span class="paso-num">3</span> Adjuntá la foto del comprobante y enviá</div>
+          <div class="paso"><span class="paso-num">4</span> En minutos tenés tus 20 cafés activos ☕</div>
+        </div>
+
+        <a id="wp-link" href="#" class="btn-wp" target="_blank">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+          Enviar comprobante por WhatsApp
+        </a>
+
+        <button class="btn btn-outline" onclick="resetAlta()" style="margin-top:8px">
+          Registrar otro socio
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ TAB ESTADO ══ -->
+  <div id="view-estado" class="view">
+
+    <div class="card">
+      <div class="card-title">Consultar mis cafés</div>
+      <div class="card-sub">Ingresá tu DNI para ver cuántos cafés disponibles tenés.</div>
+
+      <div id="alert-estado" class="alert"></div>
+
+      <div class="field">
+        <label>Tu DNI (sin puntos)</label>
+        <input type="text" id="dni-estado" placeholder="32456789" inputmode="numeric" maxlength="8">
+      </div>
+      <button class="btn btn-primary" onclick="consultarEstado()" id="btn-estado">
+        <span id="btn-estado-txt">Consultar</span>
+        <div class="spinner" id="spinner-estado"></div>
+      </button>
+    </div>
+
+    <div id="resultado-estado" style="display:none">
+      <div class="card">
+        <div class="coffee-hero">
+          <div class="coffee-number" id="cafes-num">0</div>
+          <div class="coffee-label">cafés disponibles</div>
+        </div>
+        <div id="coffee-cups" class="coffee-cups"></div>
+        <div class="info-row">
+          <span class="lbl">Socio</span>
+          <span class="val" id="socio-nombre">—</span>
+        </div>
+        <div class="info-row">
+          <span class="lbl">Estado</span>
+          <span class="val"><span class="badge" id="socio-estado-badge">—</span></span>
+        </div>
+        <div class="info-row">
+          <span class="lbl">Membresía vence</span>
+          <span class="val" id="socio-vence">—</span>
+        </div>
+      </div>
+
+      <div id="aviso-vence" class="alert warn" style="display:none">
+        ⚠ Tu membresía vence pronto. Para renovar, hacé una nueva solicitud de pago.
+      </div>
+      <div id="aviso-agotado" class="alert warn" style="display:none">
+        Sin cafés disponibles. Renová tu membresía para recargar.
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+// ── CONFIGURACIÓN ────────────────────────────────────────────
+// Reemplazá con la URL de tu Apps Script después de publicar
+const API_URL = 'https://script.google.com/macros/s/AKfycbytV-_NlL8v29W0MW6ReuSIUQe1waZK4WZfzMitimAebzHJPmRv8qdzbm52U0h-m8P7/exec';
+
+// ── TABS ─────────────────────────────────────────────────────
+function showTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + tab).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ── ALTA ─────────────────────────────────────────────────────
+async function enviarAlta() {
+  const nombre   = document.getElementById('nombre').value.trim();
+  const dni      = document.getElementById('dni').value.trim();
+  const email    = document.getElementById('email').value.trim();
+  const telefono = document.getElementById('telefono').value.trim();
+  const alert    = document.getElementById('alert-alta');
+
+  if (!nombre || !dni || !email) {
+    showAlert(alert, 'err', 'Completá nombre, DNI y email.');
+    return;
+  }
+  if (!/^\d{7,8}$/.test(dni)) {
+    showAlert(alert, 'err', 'El DNI debe tener 7 u 8 números, sin puntos.');
+    return;
+  }
+
+  setBtnLoading('btn-alta', 'spinner-alta', true);
+
+  try {
+    const res = await apiPost({ action: 'alta', nombre, dni, email, telefono });
+
+    if (res.ok) {
+      document.getElementById('form-alta').style.display = 'none';
+      document.getElementById('post-alta').style.display = 'block';
+      document.getElementById('wp-link').href = res.wpLink;
+      alert.style.display = 'none';
+    } else {
+      showAlert(alert, 'warn', res.msg);
+    }
+  } catch (e) {
+    showAlert(alert, 'err', 'Error de conexión. Intentá nuevamente.');
+  }
+
+  setBtnLoading('btn-alta', 'spinner-alta', false);
+}
+
+function resetAlta() {
+  document.getElementById('form-alta').style.display = 'block';
+  document.getElementById('post-alta').style.display = 'none';
+  document.getElementById('alert-alta').style.display = 'none';
+  ['nombre','dni','email','telefono'].forEach(id => document.getElementById(id).value = '');
+}
+
+// ── ESTADO ───────────────────────────────────────────────────
+async function consultarEstado() {
+  const dni   = document.getElementById('dni-estado').value.trim();
+  const alert = document.getElementById('alert-estado');
+
+  if (!/^\d{7,8}$/.test(dni)) {
+    showAlert(alert, 'err', 'Ingresá un DNI válido (7 u 8 números).');
+    return;
+  }
+
+  setBtnLoading('btn-estado', 'spinner-estado', true);
+  document.getElementById('resultado-estado').style.display = 'none';
+
+  try {
+    const res = await apiGet({ action: 'estado', dni });
+
+    if (!res.ok) {
+      showAlert(alert, 'warn', res.msg || 'DNI no encontrado.');
+    } else {
+      alert.style.display = 'none';
+      mostrarEstado(res);
+    }
+  } catch (e) {
+    showAlert(alert, 'err', 'Error de conexión. Intentá nuevamente.');
+  }
+
+  setBtnLoading('btn-estado', 'spinner-estado', false);
+}
+
+function mostrarEstado(data) {
+  document.getElementById('cafes-num').textContent = data.cafes;
+  document.getElementById('socio-nombre').textContent = data.nombre;
+  document.getElementById('socio-vence').textContent = data.vence || '—';
+
+  const badge = document.getElementById('socio-estado-badge');
+  badge.textContent = data.estado;
+  badge.className = 'badge';
+  if (data.estado === 'ACTIVO')    badge.classList.add('badge-ok');
+  if (data.estado === 'PENDIENTE') badge.classList.add('badge-warn');
+  if (data.estado === 'INACTIVO')  badge.classList.add('badge-err');
+
+  // Tacitas visuales (máx 20)
+  const cups = document.getElementById('coffee-cups');
+  cups.innerHTML = '';
+  const total = Math.min(data.cafes, 20);
+  for (let i = 0; i < 20; i++) {
+    const cup = document.createElement('span');
+    cup.className = 'cup' + (i >= total ? ' empty' : '');
+    cup.textContent = '☕';
+    cups.appendChild(cup);
+  }
+
+  // Avisos
+  const venceEl = document.getElementById('aviso-vence');
+  const agotEl  = document.getElementById('aviso-agotado');
+  venceEl.style.display = 'none';
+  agotEl.style.display  = 'none';
+
+  if (data.cafes === 0 && data.estado === 'ACTIVO') {
+    agotEl.style.display = 'block';
+  }
+  if (data.vence && diasHasta(data.vence) <= 5 && data.estado === 'ACTIVO') {
+    venceEl.style.display = 'block';
+  }
+
+  document.getElementById('resultado-estado').style.display = 'block';
+}
+
+function diasHasta(fechaStr) {
+  const hoy  = new Date();
+  const vence = new Date(fechaStr);
+  return Math.ceil((vence - hoy) / (1000 * 60 * 60 * 24));
+}
+
+// ── API HELPERS ──────────────────────────────────────────────
+async function apiPost(body) {
+  const r = await fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify(body)
+  });
+  return r.json();
+}
+
+async function apiGet(params) {
+  const qs  = new URLSearchParams(params).toString();
+  const r   = await fetch(`${API_URL}?${qs}`);
+  return r.json();
+}
+
+// ── UI HELPERS ───────────────────────────────────────────────
+function showAlert(el, tipo, msg) {
+  el.className = 'alert ' + tipo;
+  el.textContent = msg;
+}
+
+function setBtnLoading(btnId, spinnerId, loading) {
+  const btn     = document.getElementById(btnId);
+  const spinner = document.getElementById(spinnerId);
+  const txt     = document.getElementById(btnId + '-txt');
+  btn.disabled  = loading;
+  spinner.style.display = loading ? 'block' : 'none';
+  if (txt) txt.style.opacity = loading ? '0.4' : '1';
+}
+
+// Enter key shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const active = document.querySelector('.view.active').id;
+  if (active === 'view-alta')   enviarAlta();
+  if (active === 'view-estado') consultarEstado();
+});
+</script>
+</body>
+</html>
