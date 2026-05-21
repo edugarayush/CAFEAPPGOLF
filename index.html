@@ -42,7 +42,7 @@
     padding: 20px 24px;
     display: flex; align-items: center; gap: 14px;
   }
-  .header-logo { height: 52px; width: auto; }
+  .header-logo { height: 52px; width: 52px; flex-shrink: 0; }
   .header h1 {
     font-family: 'Cormorant Garamond', serif;
     color: var(--gold);
@@ -258,7 +258,16 @@
 <body>
 
 <div class="header">
-  <img src="./img/logo.png" class="header-logo" alt="Hoyo 19">
+  <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Palo (flagpole) -->
+  <line x1="22" y1="8" x2="22" y2="40" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/>
+  <!-- Banderín -->
+  <polygon points="22,8 36,14 22,20" fill="#C9A84C"/>
+  <!-- Pasto / green -->
+  <ellipse cx="22" cy="42" rx="14" ry="5" fill="#2D5A2D"/>
+  <!-- Hoyo -->
+  <ellipse cx="22" cy="43" rx="4" ry="1.5" fill="#1A1A1A"/>
+</svg>
   <div>
     <h1>Hoyo 19</h1>
     <p>Café &amp; Terrazas del Golf</p>
